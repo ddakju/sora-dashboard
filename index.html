@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SORA Growth Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: #7eb8ff;
+  }
+  .subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+  }
+  .overall {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .overall .score {
+    font-size: 4rem;
+    font-weight: 700;
+    color: #7eb8ff;
+  }
+  .overall .label {
+    font-size: 1rem;
+    color: #888;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+  }
+  .card {
+    background: #12121a;
+    border: 1px solid #1e1e2e;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .card h2 {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 1rem;
+  }
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+  }
+  .categories {
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+  }
+  .cat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+  .cat-name {
+    width: 120px;
+    font-size: 0.85rem;
+    color: #aaa;
+  }
+  .cat-bar-bg {
+    flex: 1;
+    height: 24px;
+    background: #1a1a2a;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+  .cat-bar {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.5s ease;
+  }
+  .cat-score {
+    width: 50px;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ccc;
+    margin-left: 0.5rem;
+  }
+  .history {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .history table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .history th, .history td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #1e1e2e;
+    font-size: 0.85rem;
+  }
+  .history th { color: #666; }
+  .history td { color: #bbb; }
+  .note { color: #888; font-style: italic; }
+  .reload-btn {
+    display: block;
+    margin: 2rem auto;
+    padding: 0.6rem 1.5rem;
+    background: #1e1e2e;
+    color: #7eb8ff;
+    border: 1px solid #2a2a3a;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .reload-btn:hover { background: #2a2a3a; }
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>SORA Growth Dashboard</h1>
+<p class="subtitle">자율 에이전트 성장 추적</p>
+
+<div class="overall">
+  <div class="score" id="overall-score">--</div>
+  <div class="label">/ 100</div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>분야별 역량 (레이더)</h2>
+    <div class="chart-container">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <h2>성장 추이</h2>
+    <div class="chart-container">
+      <canvas id="lineChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="categories" id="category-bars"></div>
+
+<div class="history">
+  <h2 style="color:#888; font-size:1rem; margin-bottom:1rem;">기록</h2>
+  <table>
+    <thead><tr><th>날짜</th><th>점수</th><th>메모</th></tr></thead>
+    <tbody id="history-body"></tbody>
+  </table>
+</div>
+
+<button class="reload-btn" onclick="loadData()">새로고침</button>
+
+<script>
+const COLORS = ['#7eb8ff','#ff7eb8','#7effb8','#ffb87e','#b87eff','#ff7e7e'];
+const DATA_PATH = 'growth-scores.json';
+
+let radarChart, lineChart;
+
+function barColor(val) {
+  if (val < 20) return '#ff4444';
+  if (val < 40) return '#ff8844';
+  if (val < 60) return '#ffcc44';
+  if (val < 80) return '#44cc88';
+  return '#44aaff';
+}
+
+async function loadData() {
+  let data;
+  try {
+    const resp = await fetch(DATA_PATH + '?t=' + Date.now());
+    data = await resp.json();
+  } catch(e) {
+    document.getElementById('overall-score').textContent = 'ERR';
+    return;
+  }
+
+  const cats = data.categories;
+  const cur = data.current;
+  const hist = data.history;
+
+  // Overall
+  const vals = cats.map(c => cur[c] || 0);
+  const overall = Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
+  document.getElementById('overall-score').textContent = overall;
+
+  // Radar
+  const radarData = {
+    labels: cats,
+    datasets: [{
+      label: '현재',
+      data: vals,
+      backgroundColor: 'rgba(126,184,255,0.15)',
+      borderColor: '#7eb8ff',
+      borderWidth: 2,
+      pointBackgroundColor: '#7eb8ff',
+    }]
+  };
+  if (radarChart) radarChart.destroy();
+  radarChart = new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: radarData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 20, color: '#444', backdropColor: 'transparent' },
+          grid: { color: '#1e1e2e' },
+          angleLines: { color: '#1e1e2e' },
+          pointLabels: { color: '#aaa', font: { size: 11 } }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Line chart
+  const dates = hist.map(h => h.date);
+  const scores = hist.map(h => h.overall);
+  if (lineChart) lineChart.destroy();
+  lineChart = new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: '종합 점수',
+        data: scores,
+        borderColor: '#7eb8ff',
+        backgroundColor: 'rgba(126,184,255,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#7eb8ff',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { min: 0, max: 100, ticks: { color: '#444' }, grid: { color: '#1e1e2e' } },
+        x: { ticks: { color: '#444' }, grid: { color: '#1e1e2e' } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Category bars
+  const barsHtml = cats.map((c, i) => {
+    const v = cur[c] || 0;
+    return `<div class="cat-row">
+      <span class="cat-name">${c}</span>
+      <div class="cat-bar-bg"><div class="cat-bar" style="width:${v}%;background:${barColor(v)}"></div></div>
+      <span class="cat-score">${v}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('category-bars').innerHTML = barsHtml;
+
+  // History table
+  const rows = hist.slice().reverse().map(h =>
+    `<tr><td>${h.date}</td><td>${h.overall}</td><td class="note">${h.note || ''}</td></tr>`
+  ).join('');
+  document.getElementById('history-body').innerHTML = rows;
+}
+
+loadData();
+</script>
+</body>
+</html>
