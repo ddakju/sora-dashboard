@@ -283,14 +283,14 @@
     50% { opacity: 0.4; }
   }
 
-  .refresh-info {
+  .connection-status {
     position: fixed;
     bottom: 16px;
     font-size: 0.7rem;
     color: #333;
   }
+  .connection-status.connected { color: #4caf7d; }
 
-  /* Nav link */
   .nav {
     position: fixed;
     top: 12px;
@@ -329,14 +329,25 @@
     <span class="zzz">Z</span>
   </div>
 
-  <div class="status-label" id="label"><span class="status-dot"></span>loading...</div>
+  <div class="status-label" id="label"><span class="status-dot"></span>connecting...</div>
   <div class="status-message" id="message"></div>
   <div class="status-time" id="time"></div>
 </div>
 
-<div class="refresh-info" id="refresh-info">auto-refresh: 30s</div>
+<div class="connection-status" id="conn-status">connecting...</div>
+
+<!-- Firebase SDK (compat for simplicity) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
+const firebaseConfig = {
+  databaseURL: "https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 const STATES = {
   idle:     { cls: 'state-idle',     label: '대기중' },
   working:  { cls: 'state-working',  label: '작업중' },
@@ -353,6 +364,7 @@ function timeAgo(dateStr) {
 }
 
 function applyState(data) {
+  if (!data) return;
   const widget = document.getElementById('widget');
   const label = document.getElementById('label');
   const message = document.getElementById('message');
@@ -368,20 +380,34 @@ function applyState(data) {
   time.textContent = data.updated_at ? timeAgo(data.updated_at) : '';
 }
 
-async function poll() {
-  try {
-    const resp = await fetch('status.json?t=' + Date.now());
-    if (resp.ok) {
-      const data = await resp.json();
-      applyState(data);
-    }
-  } catch(e) {
-    // silently retry next cycle
-  }
-}
+// Real-time listener
+const statusRef = db.ref('status');
+statusRef.on('value', (snapshot) => {
+  const data = snapshot.val();
+  applyState(data);
+  document.getElementById('conn-status').textContent = 'real-time connected';
+  document.getElementById('conn-status').classList.add('connected');
+});
 
-poll();
-setInterval(poll, 30000); // 30s refresh — GitHub Pages CDN cache
+// Update time-ago every 10s
+setInterval(() => {
+  const time = document.getElementById('time');
+  if (time.dataset.updatedAt) {
+    time.textContent = timeAgo(time.dataset.updatedAt);
+  }
+}, 10000);
+
+// Connection state monitoring
+db.ref('.info/connected').on('value', (snap) => {
+  const conn = document.getElementById('conn-status');
+  if (snap.val() === true) {
+    conn.textContent = 'real-time connected';
+    conn.classList.add('connected');
+  } else {
+    conn.textContent = 'reconnecting...';
+    conn.classList.remove('connected');
+  }
+});
 </script>
 
 </body>
