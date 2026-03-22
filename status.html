@@ -114,7 +114,7 @@
   }
   .state-idle .slime { animation: bounce 2s ease-in-out infinite; }
 
-  /* ── State: working ── */
+  /* ── State: working (default / fallback) ── */
   .state-working .slime-body { background: #4a90d9; }
   .state-working .slime-body::after { background: #4a90d9; }
   .state-working .eye {
@@ -131,6 +131,84 @@
   }
   .state-working .slime { animation: work 0.6s ease-in-out infinite; }
   .state-working .slime-body { animation: stretch 0.6s ease-in-out infinite; }
+
+  /* ── Substate: thinking — purple, eyes up ── */
+  .sub-thinking .slime-body { background: #9b6dd7; animation: think-pulse 1.5s ease-in-out infinite; }
+  .sub-thinking .slime-body::after { background: #9b6dd7; }
+  .sub-thinking .eye { background: #2d1650; width: 10px; height: 8px; border-radius: 50%; }
+  .sub-thinking .eyes { transform: translateY(-3px); }
+  .sub-thinking .mouth {
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 3px solid #2d1650; border-top: none; border-left: none;
+  }
+  .sub-thinking .slime { animation: think-bob 2s ease-in-out infinite; }
+  .sub-thinking .status-label { color: #9b6dd7; }
+  .sub-thinking .status-dot { background: #9b6dd7; }
+
+  /* ── Substate: typing — blue, mouth open/close ── */
+  .sub-typing .slime-body { background: #4a90d9; }
+  .sub-typing .slime-body::after { background: #4a90d9; }
+  .sub-typing .eye { background: #0d2a4a; width: 10px; height: 10px; }
+  .sub-typing .mouth {
+    width: 12px; height: 8px; border-radius: 50%;
+    border: 3px solid #0d2a4a;
+    animation: talk 0.4s ease-in-out infinite;
+  }
+  .sub-typing .slime { animation: work 0.6s ease-in-out infinite; }
+  .sub-typing .slime-body { animation: stretch 0.6s ease-in-out infinite; }
+
+  /* ── Substate: searching — yellow, eyes scanning ── */
+  .sub-searching .slime-body { background: #e0a830; animation: none; }
+  .sub-searching .slime-body::after { background: #e0a830; }
+  .sub-searching .eye { background: #4a3600; width: 11px; height: 11px; }
+  .sub-searching .eyes { animation: scan-eyes 1.2s ease-in-out infinite; }
+  .sub-searching .mouth {
+    width: 14px; height: 5px; border-radius: 2px;
+    border-bottom: 3px solid #4a3600; border-left: 3px solid #4a3600;
+    border-right: 3px solid #4a3600; border-top: none;
+  }
+  .sub-searching .slime { animation: search-bounce 0.8s ease-in-out infinite; }
+  .sub-searching .status-label { color: #e0a830; }
+  .sub-searching .status-dot { background: #e0a830; }
+
+  /* ── Substate: coding — mint, focused squint ── */
+  .sub-coding .slime-body { background: #2dd4bf; animation: none; }
+  .sub-coding .slime-body::after { background: #2dd4bf; }
+  .sub-coding .eye { background: #0a3a36; width: 12px; height: 6px; border-radius: 6px 6px 2px 2px; }
+  .sub-coding .mouth {
+    width: 16px; height: 3px; border-radius: 2px;
+    border-bottom: 3px solid #0a3a36; border-left: none;
+    border-right: none; border-top: none;
+  }
+  .sub-coding .slime { animation: code-type 0.3s steps(2) infinite; }
+  .sub-coding .slime-body { animation: stretch 0.8s ease-in-out infinite; }
+  .sub-coding .status-label { color: #2dd4bf; }
+  .sub-coding .status-dot { background: #2dd4bf; }
+
+  /* ── Substate: reading — sky blue, big eyes ── */
+  .sub-reading .slime-body { background: #5bc0de; animation: none; }
+  .sub-reading .slime-body::after { background: #5bc0de; }
+  .sub-reading .eye { background: #0a3040; width: 14px; height: 14px; border-radius: 50%; }
+  .sub-reading .mouth {
+    width: 14px; height: 5px; border-radius: 2px;
+    border-bottom: 3px solid #0a3040; border-left: 3px solid #0a3040;
+    border-right: 3px solid #0a3040; border-top: none;
+  }
+  .sub-reading .slime { animation: read-nod 1.5s ease-in-out infinite; }
+  .sub-reading .status-label { color: #5bc0de; }
+  .sub-reading .status-dot { background: #5bc0de; }
+
+  /* ── Substate: restarting — orange, spinning ── */
+  .sub-restarting .slime-body { background: #e07b30; animation: none; }
+  .sub-restarting .slime-body::after { background: #e07b30; }
+  .sub-restarting .eye { background: #4a2800; width: 10px; height: 10px; }
+  .sub-restarting .mouth {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 3px solid #4a2800;
+  }
+  .sub-restarting .slime { animation: spin-restart 1s linear infinite; }
+  .sub-restarting .status-label { color: #e07b30; }
+  .sub-restarting .status-dot { background: #e07b30; }
 
   /* ── State: error ── */
   .state-error .slime-body { background: #e05555; }
@@ -212,6 +290,50 @@
   @keyframes breathe {
     0%, 100% { transform: scale(1); }
     50%       { transform: scale(1.07); }
+  }
+
+  /* ── Substate animations ── */
+  @keyframes think-bob {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  @keyframes think-pulse {
+    0%, 100% { transform: scaleX(1) scaleY(1); }
+    50%       { transform: scaleX(1.03) scaleY(0.97); }
+  }
+
+  @keyframes talk {
+    0%, 100% { transform: scaleY(1); }
+    50%       { transform: scaleY(0.4); }
+  }
+
+  @keyframes scan-eyes {
+    0%, 100% { transform: translateX(0); }
+    25%       { transform: translateX(5px); }
+    75%       { transform: translateX(-5px); }
+  }
+
+  @keyframes search-bounce {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25%       { transform: translateY(-5px) rotate(3deg); }
+    75%       { transform: translateY(-5px) rotate(-3deg); }
+  }
+
+  @keyframes code-type {
+    0%  { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  @keyframes read-nod {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    30%       { transform: translateY(-3px) rotate(2deg); }
+    60%       { transform: translateY(-3px) rotate(-2deg); }
+  }
+
+  @keyframes spin-restart {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   /* ── ZZZ ── */
@@ -355,6 +477,15 @@ const STATES = {
   sleeping: { cls: 'state-sleeping', label: 'zzZ...' },
 };
 
+const SUBSTATES = {
+  thinking:   '생각중',
+  typing:     '입력중',
+  searching:  '검색중',
+  coding:     '코딩중',
+  reading:    '읽는중',
+  restarting: '재시작중',
+};
+
 function timeAgo(dateStr) {
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
   if (diff < 60) return `${Math.floor(diff)}초 전`;
@@ -362,6 +493,8 @@ function timeAgo(dateStr) {
   if (diff < 86400) return `${Math.floor(diff/3600)}시간 전`;
   return `${Math.floor(diff/86400)}일 전`;
 }
+
+const SUB_CLASSES = Object.keys(SUBSTATES).map(k => 'sub-' + k);
 
 function applyState(data) {
   if (!data) return;
@@ -371,11 +504,23 @@ function applyState(data) {
   const time = document.getElementById('time');
 
   const state = data.state || 'idle';
+  const substate = data.substate || '';
   const info = STATES[state] || STATES.idle;
 
+  // Clear all state/substate classes
   Object.values(STATES).forEach(s => widget.classList.remove(s.cls));
+  SUB_CLASSES.forEach(c => widget.classList.remove(c));
+
   widget.classList.add(info.cls);
-  label.innerHTML = `<span class="status-dot"></span>${info.label}`;
+
+  // Apply substate class if working + valid substate
+  let displayLabel = info.label;
+  if (state === 'working' && substate && SUBSTATES[substate]) {
+    widget.classList.add('sub-' + substate);
+    displayLabel = SUBSTATES[substate];
+  }
+
+  label.innerHTML = `<span class="status-dot"></span>${displayLabel}`;
   message.textContent = data.message || '';
   time.textContent = data.updated_at ? timeAgo(data.updated_at) : '';
 }
