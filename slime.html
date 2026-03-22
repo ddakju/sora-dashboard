@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SORA Slime Widget</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ── Slime Body ── */
+  .slime {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slime-body {
+    width: 100px;
+    height: 90px;
+    border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%;
+    position: relative;
+    transition: background 0.4s ease;
+  }
+
+  /* Bottom drip */
+  .slime-body::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 18px;
+    border-radius: 0 0 50% 50%;
+    background: inherit;
+    transition: background 0.4s ease;
+  }
+
+  /* Highlight */
+  .slime-body::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    width: 22px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transform: rotate(-20deg);
+  }
+
+  /* ── Face ── */
+  .face {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -44%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .eyes {
+    display: flex;
+    gap: 14px;
+  }
+
+  .eye {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1a1a2e;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .mouth {
+    width: 18px;
+    height: 8px;
+    border-radius: 0 0 10px 10px;
+    border-bottom: 3px solid #1a1a2e;
+    border-left: 3px solid #1a1a2e;
+    border-right: 3px solid #1a1a2e;
+    transition: all 0.3s ease;
+  }
+
+  /* ── State: idle ── */
+  .state-idle .slime-body { background: #4caf7d; }
+  .state-idle .slime-body::after { background: #4caf7d; }
+  .state-idle .eye { background: #1a3a2e; }
+  .state-idle .mouth {
+    width: 18px; height: 8px;
+    border-radius: 0 0 10px 10px;
+    border-bottom: 3px solid #1a3a2e;
+    border-left: 3px solid #1a3a2e;
+    border-right: 3px solid #1a3a2e;
+    border-top: none;
+  }
+  .state-idle .slime { animation: bounce 2s ease-in-out infinite; }
+
+  /* ── State: working ── */
+  .state-working .slime-body { background: #4a90d9; }
+  .state-working .slime-body::after { background: #4a90d9; }
+  .state-working .eye {
+    background: #0d2a4a;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .state-working .mouth {
+    width: 14px; height: 4px;
+    border-radius: 2px;
+    border-bottom: 3px solid #0d2a4a;
+    border-left: 3px solid #0d2a4a;
+    border-right: 3px solid #0d2a4a;
+  }
+  .state-working .slime { animation: work 0.6s ease-in-out infinite; }
+  .state-working .slime-body { animation: stretch 0.6s ease-in-out infinite; }
+
+  /* ── State: error ── */
+  .state-error .slime-body { background: #e05555; }
+  .state-error .slime-body::after { background: #e05555; }
+  .state-error .eye {
+    background: #3a0d0d;
+    border-radius: 50%;
+    width: 11px; height: 11px;
+  }
+  /* @ eye via ring */
+  .state-error .eye::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    border: 2px solid #3a0d0d;
+    background: #e05555;
+  }
+  .state-error .mouth {
+    width: 16px; height: 6px;
+    border-radius: 10px 10px 0 0;
+    border-top: 3px solid #3a0d0d;
+    border-left: 3px solid #3a0d0d;
+    border-right: 3px solid #3a0d0d;
+    border-bottom: none;
+  }
+  .state-error .slime { animation: shake 0.3s ease-in-out infinite; }
+
+  /* ── State: sleeping ── */
+  .state-sleeping .slime-body { background: #888; }
+  .state-sleeping .slime-body::after { background: #888; }
+  .state-sleeping .eye {
+    background: transparent;
+    width: 12px; height: 4px;
+    border-radius: 0;
+    border-bottom: 3px solid #333;
+    border-top: none;
+  }
+  .state-sleeping .mouth {
+    width: 12px; height: 4px;
+    border-radius: 2px;
+    border-bottom: 3px solid #333;
+    border-left: 3px solid #333;
+    border-right: 3px solid #333;
+  }
+  .state-sleeping .slime { animation: breathe 3s ease-in-out infinite; }
+
+  /* ── Animations ── */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) scaleY(1) scaleX(1); }
+    40%       { transform: translateY(-16px) scaleY(1.06) scaleX(0.96); }
+    60%       { transform: translateY(-14px) scaleY(1.06) scaleX(0.96); }
+    80%       { transform: translateY(2px) scaleY(0.93) scaleX(1.07); }
+  }
+
+  @keyframes work {
+    0%, 100% { transform: translateY(0); }
+    25%       { transform: translateY(-8px); }
+    75%       { transform: translateY(2px); }
+  }
+
+  @keyframes stretch {
+    0%, 100% { transform: scaleX(1) scaleY(1); }
+    25%       { transform: scaleX(0.88) scaleY(1.12); }
+    75%       { transform: scaleX(1.08) scaleY(0.94); }
+  }
+
+  @keyframes shake {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-5px) rotate(-2deg); }
+    40%  { transform: translateX(5px) rotate(2deg); }
+    60%  { transform: translateX(-4px) rotate(-1deg); }
+    80%  { transform: translateX(4px) rotate(1deg); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.07); }
+  }
+
+  /* ── ZZZ for sleeping ── */
+  .zzz {
+    position: absolute;
+    top: -8px;
+    right: -4px;
+    font-size: 13px;
+    color: #aaa;
+    font-weight: bold;
+    opacity: 0;
+    animation: none;
+  }
+
+  .state-sleeping .zzz {
+    animation: floatZ 2.4s ease-in-out infinite;
+  }
+
+  .state-sleeping .zzz:nth-child(2) { animation-delay: 0.8s; font-size: 10px; right: -12px; top: -16px; }
+  .state-sleeping .zzz:nth-child(3) { animation-delay: 1.6s; font-size: 8px; right: -18px; top: -22px; }
+
+  @keyframes floatZ {
+    0%   { opacity: 0; transform: translateY(0) translateX(0); }
+    20%  { opacity: 1; }
+    80%  { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-18px) translateX(8px); }
+  }
+
+  /* ── Status label ── */
+  .status-label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: color 0.4s ease;
+  }
+
+  .state-idle     .status-label { color: #4caf7d; }
+  .state-working  .status-label { color: #4a90d9; }
+  .state-error    .status-label { color: #e05555; }
+  .state-sleeping .status-label { color: #aaa; }
+
+  /* ── Buttons ── */
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    padding: 6px 14px;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(255,255,255,0.08);
+    color: #ccc;
+  }
+
+  .btn:hover { background: rgba(255,255,255,0.16); color: #fff; }
+  .btn.active { color: #fff; }
+
+  .btn-idle.active     { border-color: #4caf7d; color: #4caf7d; }
+  .btn-working.active  { border-color: #4a90d9; color: #4a90d9; }
+  .btn-error.active    { border-color: #e05555; color: #e05555; }
+  .btn-sleeping.active { border-color: #aaa;    color: #aaa; }
+</style>
+</head>
+<body>
+
+<div class="widget state-idle" id="widget">
+
+  <div class="slime" id="slime">
+    <div class="slime-body">
+      <div class="face">
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+        <div class="mouth"></div>
+      </div>
+    </div>
+    <!-- ZZZ bubbles (only visible in sleeping state) -->
+    <span class="zzz">z</span>
+    <span class="zzz">z</span>
+    <span class="zzz">Z</span>
+  </div>
+
+  <div class="status-label" id="label">대기중</div>
+
+  <div class="controls">
+    <button class="btn btn-idle active"     onclick="setState('idle')">💤 대기</button>
+    <button class="btn btn-working"         onclick="setState('working')">⚡ 작업</button>
+    <button class="btn btn-error"           onclick="setState('error')">❗ 에러</button>
+    <button class="btn btn-sleeping"        onclick="setState('sleeping')">😴 수면</button>
+  </div>
+
+</div>
+
+<script>
+  const STATES = {
+    idle:     { cls: 'state-idle',     label: '대기중' },
+    working:  { cls: 'state-working',  label: '코딩 중...' },
+    error:    { cls: 'state-error',    label: '에러 발생!' },
+    sleeping: { cls: 'state-sleeping', label: 'zzZ...' },
+  };
+
+  let current = 'idle';
+
+  function setState(name) {
+    const widget = document.getElementById('widget');
+    const label  = document.getElementById('label');
+
+    // Remove old state class
+    Object.values(STATES).forEach(s => widget.classList.remove(s.cls));
+    widget.classList.add(STATES[name].cls);
+    label.textContent = STATES[name].label;
+
+    // Update active button
+    document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.btn-${name}`).classList.add('active');
+
+    current = name;
+  }
+</script>
+
+</body>
+</html>
