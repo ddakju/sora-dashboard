@@ -42,7 +42,6 @@
     transition: background 0.4s ease;
   }
 
-  /* Bottom drip */
   .slime-body::after {
     content: '';
     position: absolute;
@@ -56,7 +55,6 @@
     transition: background 0.4s ease;
   }
 
-  /* Highlight */
   .slime-body::before {
     content: '';
     position: absolute;
@@ -81,10 +79,7 @@
     gap: 6px;
   }
 
-  .eyes {
-    display: flex;
-    gap: 14px;
-  }
+  .eyes { display: flex; gap: 14px; }
 
   .eye {
     width: 10px;
@@ -119,14 +114,10 @@
   }
   .state-idle .slime { animation: bounce 2s ease-in-out infinite; }
 
-  /* ── State: working ── */
+  /* ── State: working (default = typing) ── */
   .state-working .slime-body { background: #4a90d9; }
   .state-working .slime-body::after { background: #4a90d9; }
-  .state-working .eye {
-    background: #0d2a4a;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-  }
+  .state-working .eye { background: #0d2a4a; width: 8px; height: 8px; border-radius: 50%; }
   .state-working .mouth {
     width: 14px; height: 4px;
     border-radius: 2px;
@@ -137,15 +128,87 @@
   .state-working .slime { animation: work 0.6s ease-in-out infinite; }
   .state-working .slime-body { animation: stretch 0.6s ease-in-out infinite; }
 
+  /* substate: thinking — 보라 #9b6dd7, 눈 위로 + 동그란 입 */
+  .sub-thinking .slime-body { background: #9b6dd7 !important; }
+  .sub-thinking .slime-body::after { background: #9b6dd7 !important; }
+  .sub-thinking .eye { background: #2d1a4a !important; width: 6px !important; height: 6px !important; border-radius: 50% !important; transform: translateY(-6px) !important; }
+  .sub-thinking .mouth {
+    width: 8px !important; height: 8px !important;
+    border-radius: 50% !important;
+    border: 3px solid #2d1a4a !important;
+    background: transparent !important;
+  }
+  .sub-thinking .slime { animation: think-float 2s ease-in-out infinite !important; }
+  .sub-thinking .slime-body { animation: none !important; }
+
+  /* substate: searching — 노랑 #e0a830, 큰 눈 + 좌우 스캔 */
+  .sub-searching .slime-body { background: #e0a830 !important; }
+  .sub-searching .slime-body::after { background: #e0a830 !important; }
+  .sub-searching .eye { background: #4a3010 !important; width: 12px !important; height: 12px !important; border-radius: 50% !important; }
+  .sub-searching .mouth {
+    width: 6px !important; height: 4px !important;
+    border-radius: 2px !important;
+    border: none !important;
+    background: #4a3010 !important;
+  }
+  .sub-searching .slime { animation: work 0.6s ease-in-out infinite !important; }
+  .sub-searching .slime-body { animation: none !important; }
+  .sub-searching .eyes { animation: look-around 0.8s ease-in-out infinite !important; }
+
+  /* substate: coding — 민트 #2dd4bf, 반감은 눈(집중) */
+  .sub-coding .slime-body { background: #2dd4bf !important; }
+  .sub-coding .slime-body::after { background: #2dd4bf !important; }
+  .sub-coding .eye {
+    background: transparent !important;
+    width: 12px !important; height: 3px !important;
+    border-radius: 0 !important;
+    border-bottom: 3px solid #0d3a3a !important;
+    border-top: none !important;
+  }
+  .sub-coding .mouth {
+    width: 18px !important; height: 2px !important;
+    border-radius: 2px !important;
+    border: none !important;
+    background: #0d3a3a !important;
+  }
+  .sub-coding .slime { animation: code-bob 0.8s ease-in-out infinite !important; }
+  .sub-coding .slime-body { animation: none !important; }
+
+  /* substate: reading — 하늘 #5bc0de, 큰 반짝이는 눈 */
+  .sub-reading .slime-body { background: #5bc0de !important; }
+  .sub-reading .slime-body::after { background: #5bc0de !important; }
+  .sub-reading .eye {
+    background: #1a3a4a !important; width: 14px !important; height: 14px !important; border-radius: 50% !important;
+    box-shadow: inset 3px 2px 0 rgba(255,255,255,0.5) !important;
+  }
+  .sub-reading .mouth {
+    width: 10px !important; height: 5px !important;
+    border-radius: 0 0 8px 8px !important;
+    border-bottom: 3px solid #1a3a4a !important;
+    border-left: 3px solid #1a3a4a !important;
+    border-right: 3px solid #1a3a4a !important;
+    border-top: none !important;
+  }
+  .sub-reading .slime { animation: read-nod 2.5s ease-in-out infinite !important; }
+  .sub-reading .slime-body { animation: none !important; }
+
+  /* substate: restarting — 주황 #e07b30, 동그란 입 + 빙글빙글 */
+  .sub-restarting .slime-body { background: #e07b30 !important; }
+  .sub-restarting .slime-body::after { background: #e07b30 !important; }
+  .sub-restarting .eye { background: #4a2a0d !important; width: 6px !important; height: 6px !important; border-radius: 50% !important; }
+  .sub-restarting .mouth {
+    width: 10px !important; height: 10px !important;
+    border-radius: 50% !important;
+    border: 3px solid #4a2a0d !important;
+    background: transparent !important;
+  }
+  .sub-restarting .slime { animation: spin 1.5s linear infinite !important; }
+  .sub-restarting .slime-body { animation: none !important; }
+
   /* ── State: error ── */
   .state-error .slime-body { background: #e05555; }
   .state-error .slime-body::after { background: #e05555; }
-  .state-error .eye {
-    background: #3a0d0d;
-    border-radius: 50%;
-    width: 11px; height: 11px;
-  }
-  /* @ eye via ring */
+  .state-error .eye { background: #3a0d0d; border-radius: 50%; width: 11px; height: 11px; }
   .state-error .eye::after {
     content: '';
     position: absolute;
@@ -219,7 +282,36 @@
     50%       { transform: scale(1.07); }
   }
 
-  /* ── ZZZ for sleeping ── */
+  @keyframes think-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    30%       { transform: translateY(-10px) rotate(2deg); }
+    70%       { transform: translateY(-8px) rotate(-2deg); }
+  }
+
+  @keyframes look-around {
+    0%, 100% { transform: translateX(0); }
+    25%       { transform: translateX(-4px); }
+    75%       { transform: translateX(4px); }
+  }
+
+  @keyframes code-bob {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
+  }
+
+  @keyframes read-nod {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25%       { transform: translateY(-3px) rotate(3deg); }
+    50%       { transform: translateY(2px) rotate(0deg); }
+    75%       { transform: translateY(-3px) rotate(-3deg); }
+  }
+
+  @keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* ── ZZZ ── */
   .zzz {
     position: absolute;
     top: -8px;
@@ -231,10 +323,7 @@
     animation: none;
   }
 
-  .state-sleeping .zzz {
-    animation: floatZ 2.4s ease-in-out infinite;
-  }
-
+  .state-sleeping .zzz { animation: floatZ 2.4s ease-in-out infinite; }
   .state-sleeping .zzz:nth-child(2) { animation-delay: 0.8s; font-size: 10px; right: -12px; top: -16px; }
   .state-sleeping .zzz:nth-child(3) { animation-delay: 1.6s; font-size: 8px; right: -18px; top: -22px; }
 
@@ -257,39 +346,29 @@
   .state-working  .status-label { color: #4a90d9; }
   .state-error    .status-label { color: #e05555; }
   .state-sleeping .status-label { color: #aaa; }
+  .sub-thinking   .status-label { color: #9b6dd7 !important; }
+  .sub-searching  .status-label { color: #e0a830 !important; }
+  .sub-coding     .status-label { color: #2dd4bf !important; }
+  .sub-reading    .status-label { color: #5bc0de !important; }
+  .sub-restarting .status-label { color: #e07b30 !important; }
 
-  /* ── Buttons ── */
-  .controls {
-    display: flex;
-    gap: 8px;
-    margin-top: 20px;
+  /* ── Connection indicator ── */
+  .connection {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.3px;
   }
-
-  .btn {
-    padding: 6px 14px;
-    border: 2px solid transparent;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: rgba(255,255,255,0.08);
-    color: #ccc;
-  }
-
-  .btn:hover { background: rgba(255,255,255,0.16); color: #fff; }
-  .btn.active { color: #fff; }
-
-  .btn-idle.active     { border-color: #4caf7d; color: #4caf7d; }
-  .btn-working.active  { border-color: #4a90d9; color: #4a90d9; }
-  .btn-error.active    { border-color: #e05555; color: #e05555; }
-  .btn-sleeping.active { border-color: #aaa;    color: #aaa; }
+  .connection.live { color: #4caf7d; }
 </style>
 </head>
 <body>
 
-<div class="widget state-idle" id="widget">
+<div class="connection" id="conn">connecting...</div>
 
+<div class="widget state-idle" id="widget">
   <div class="slime" id="slime">
     <div class="slime-body">
       <div class="face">
@@ -300,48 +379,69 @@
         <div class="mouth"></div>
       </div>
     </div>
-    <!-- ZZZ bubbles (only visible in sleeping state) -->
     <span class="zzz">z</span>
     <span class="zzz">z</span>
     <span class="zzz">Z</span>
   </div>
-
-  <div class="status-label" id="label">대기중</div>
-
-  <div class="controls">
-    <button class="btn btn-idle active"     onclick="setState('idle')">💤 대기</button>
-    <button class="btn btn-working"         onclick="setState('working')">⚡ 작업</button>
-    <button class="btn btn-error"           onclick="setState('error')">❗ 에러</button>
-    <button class="btn btn-sleeping"        onclick="setState('sleeping')">😴 수면</button>
-  </div>
-
+  <div class="status-label" id="label">connecting...</div>
 </div>
 
 <script>
+  const FIREBASE_URL = 'https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app/status.json';
+
   const STATES = {
     idle:     { cls: 'state-idle',     label: '대기중' },
-    working:  { cls: 'state-working',  label: '코딩 중...' },
+    working:  { cls: 'state-working',  label: '작업 중...' },
     error:    { cls: 'state-error',    label: '에러 발생!' },
     sleeping: { cls: 'state-sleeping', label: 'zzZ...' },
   };
 
-  let current = 'idle';
+  const SUBSTATES = ['thinking', 'typing', 'searching', 'coding', 'reading', 'restarting'];
+  const SUBSTATE_LABELS = {
+    thinking: '생각 중...',
+    typing: '입력 중...',
+    searching: '검색 중...',
+    coding: '코딩 중...',
+    reading: '읽는 중...',
+    restarting: '재시작 중...',
+  };
 
-  function setState(name) {
+  function setState(name, message, substate) {
+    if (!STATES[name]) name = 'idle';
+
     const widget = document.getElementById('widget');
     const label  = document.getElementById('label');
 
-    // Remove old state class
     Object.values(STATES).forEach(s => widget.classList.remove(s.cls));
+    SUBSTATES.forEach(s => widget.classList.remove('sub-' + s));
+
     widget.classList.add(STATES[name].cls);
-    label.textContent = STATES[name].label;
 
-    // Update active button
-    document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.btn-${name}`).classList.add('active');
-
-    current = name;
+    if (name === 'working' && substate && SUBSTATES.includes(substate)) {
+      widget.classList.add('sub-' + substate);
+      label.textContent = message || SUBSTATE_LABELS[substate] || STATES[name].label;
+    } else {
+      label.textContent = message || STATES[name].label;
+    }
   }
+
+  // Poll Firebase every 3 seconds
+  async function pollFirebase() {
+    const conn = document.getElementById('conn');
+    try {
+      const res = await fetch(FIREBASE_URL);
+      const status = await res.json();
+      conn.textContent = 'live';
+      conn.classList.add('live');
+      setState(status.state, status.message, status.substate);
+    } catch (e) {
+      conn.textContent = 'offline';
+      conn.classList.remove('live');
+    }
+  }
+
+  pollFirebase();
+  setInterval(pollFirebase, 3000);
 </script>
 
 </body>
