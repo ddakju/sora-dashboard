@@ -362,6 +362,42 @@
     letter-spacing: 0.3px;
   }
   .connection.live { color: #4caf7d; }
+
+  /* ── Control buttons ── */
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .ctrl-btn {
+    padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    color: #aaa;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+  }
+  .ctrl-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: #ddd;
+    border-color: rgba(255,255,255,0.25);
+  }
+  .ctrl-btn:active { transform: scale(0.95); }
+  .ctrl-btn.sent {
+    background: rgba(76,175,125,0.2);
+    border-color: rgba(76,175,125,0.4);
+    color: #4caf7d;
+    pointer-events: none;
+  }
+  .ctrl-btn.error {
+    background: rgba(224,85,85,0.2);
+    border-color: rgba(224,85,85,0.4);
+    color: #e05555;
+  }
 </style>
 </head>
 <body>
@@ -384,6 +420,10 @@
     <span class="zzz">Z</span>
   </div>
   <div class="status-label" id="label">connecting...</div>
+  <div class="controls">
+    <button class="ctrl-btn" id="btn-restart" onclick="sendCommand('restart', this)">재시작</button>
+    <button class="ctrl-btn" id="btn-repair" onclick="sendCommand('repair', this)">자가수리</button>
+  </div>
 </div>
 
 <script>
@@ -437,6 +477,31 @@
     } catch (e) {
       conn.textContent = 'offline';
       conn.classList.remove('live');
+    }
+  }
+
+  const FIREBASE_CMD_URL = 'https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app/commands.json';
+
+  async function sendCommand(action, btn) {
+    const orig = btn.textContent;
+    btn.textContent = '전송 중...';
+    btn.classList.remove('error');
+    try {
+      await fetch(FIREBASE_CMD_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: action,
+          requested_at: new Date().toISOString()
+        })
+      });
+      btn.textContent = '전송 완료';
+      btn.classList.add('sent');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('sent'); btn.style.pointerEvents = ''; }, 60000);
+    } catch (e) {
+      btn.textContent = '실패';
+      btn.classList.add('error');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('error'); }, 3000);
     }
   }
 
