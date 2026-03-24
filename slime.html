@@ -141,6 +141,20 @@
   .sub-thinking .slime { animation: think-float 2s ease-in-out infinite !important; }
   .sub-thinking .slime-body { animation: none !important; }
 
+  /* substate: typing — 분홍 #e07bbb, 작은 입 움직임 */
+  .sub-typing .slime-body { background: #e07bbb !important; }
+  .sub-typing .slime-body::after { background: #e07bbb !important; }
+  .sub-typing .eye { background: #4a1a3a !important; width: 7px !important; height: 7px !important; border-radius: 50% !important; }
+  .sub-typing .mouth {
+    width: 4px !important; height: 4px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    background: #4a1a3a !important;
+    animation: type-talk 0.4s ease-in-out infinite !important;
+  }
+  .sub-typing .slime { animation: work 0.8s ease-in-out infinite !important; }
+  .sub-typing .slime-body { animation: none !important; }
+
   /* substate: searching — 노랑 #e0a830, 큰 눈 + 좌우 스캔 */
   .sub-searching .slime-body { background: #e0a830 !important; }
   .sub-searching .slime-body::after { background: #e0a830 !important; }
@@ -288,6 +302,11 @@
     70%       { transform: translateY(-8px) rotate(-2deg); }
   }
 
+  @keyframes type-talk {
+    0%, 100% { transform: scaleY(1); }
+    50%       { transform: scaleY(0.4); }
+  }
+
   @keyframes look-around {
     0%, 100% { transform: translateX(0); }
     25%       { transform: translateX(-4px); }
@@ -347,6 +366,7 @@
   .state-error    .status-label { color: #e05555; }
   .state-sleeping .status-label { color: #aaa; }
   .sub-thinking   .status-label { color: #9b6dd7 !important; }
+  .sub-typing     .status-label { color: #e07bbb !important; }
   .sub-searching  .status-label { color: #e0a830 !important; }
   .sub-coding     .status-label { color: #2dd4bf !important; }
   .sub-reading    .status-label { color: #5bc0de !important; }
