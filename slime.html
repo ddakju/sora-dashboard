@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SORA Slime Widget</title>
+<title>SORA & LUNA Slime</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     background: #1a1a2e;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 60px;
     min-height: 100vh;
     font-family: 'Segoe UI', sans-serif;
   }
@@ -22,6 +23,14 @@
     flex-direction: column;
     align-items: center;
     gap: 12px;
+  }
+
+  .bot-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ccc;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
   }
 
   /* ── Slime Body ── */
@@ -128,7 +137,7 @@
   .state-working .slime { animation: work 0.6s ease-in-out infinite; }
   .state-working .slime-body { animation: stretch 0.6s ease-in-out infinite; }
 
-  /* substate: thinking — 보라 #9b6dd7, 눈 위로 + 동그란 입 */
+  /* substate: thinking */
   .sub-thinking .slime-body { background: #9b6dd7 !important; }
   .sub-thinking .slime-body::after { background: #9b6dd7 !important; }
   .sub-thinking .eye { background: #2d1a4a !important; width: 6px !important; height: 6px !important; border-radius: 50% !important; transform: translateY(-6px) !important; }
@@ -141,7 +150,7 @@
   .sub-thinking .slime { animation: think-float 2s ease-in-out infinite !important; }
   .sub-thinking .slime-body { animation: none !important; }
 
-  /* substate: typing — 분홍 #e07bbb, 작은 입 움직임 */
+  /* substate: typing */
   .sub-typing .slime-body { background: #e07bbb !important; }
   .sub-typing .slime-body::after { background: #e07bbb !important; }
   .sub-typing .eye { background: #4a1a3a !important; width: 7px !important; height: 7px !important; border-radius: 50% !important; }
@@ -155,7 +164,7 @@
   .sub-typing .slime { animation: work 0.8s ease-in-out infinite !important; }
   .sub-typing .slime-body { animation: none !important; }
 
-  /* substate: searching — 노랑 #e0a830, 큰 눈 + 좌우 스캔 */
+  /* substate: searching */
   .sub-searching .slime-body { background: #e0a830 !important; }
   .sub-searching .slime-body::after { background: #e0a830 !important; }
   .sub-searching .eye { background: #4a3010 !important; width: 12px !important; height: 12px !important; border-radius: 50% !important; }
@@ -169,7 +178,7 @@
   .sub-searching .slime-body { animation: none !important; }
   .sub-searching .eyes { animation: look-around 0.8s ease-in-out infinite !important; }
 
-  /* substate: coding — 민트 #2dd4bf, 반감은 눈(집중) */
+  /* substate: coding */
   .sub-coding .slime-body { background: #2dd4bf !important; }
   .sub-coding .slime-body::after { background: #2dd4bf !important; }
   .sub-coding .eye {
@@ -188,7 +197,7 @@
   .sub-coding .slime { animation: code-bob 0.8s ease-in-out infinite !important; }
   .sub-coding .slime-body { animation: none !important; }
 
-  /* substate: reading — 하늘 #5bc0de, 큰 반짝이는 눈 */
+  /* substate: reading */
   .sub-reading .slime-body { background: #5bc0de !important; }
   .sub-reading .slime-body::after { background: #5bc0de !important; }
   .sub-reading .eye {
@@ -206,7 +215,7 @@
   .sub-reading .slime { animation: read-nod 2.5s ease-in-out infinite !important; }
   .sub-reading .slime-body { animation: none !important; }
 
-  /* substate: restarting — 주황 #e07b30, 동그란 입 + 빙글빙글 */
+  /* substate: restarting */
   .sub-restarting .slime-body { background: #e07b30 !important; }
   .sub-restarting .slime-body::after { background: #e07b30 !important; }
   .sub-restarting .eye { background: #4a2a0d !important; width: 6px !important; height: 6px !important; border-radius: 50% !important; }
@@ -418,14 +427,30 @@
     border-color: rgba(224,85,85,0.4);
     color: #e05555;
   }
+
+  /* ── Mobile responsive ── */
+  @media (max-width: 480px) {
+    body {
+      flex-direction: column;
+      gap: 40px;
+      padding: 30px 0;
+    }
+    .bot-name { font-size: 14px; }
+    .slime { width: 100px; height: 100px; }
+    .slime-body { width: 80px; height: 72px; }
+    .status-label { font-size: 12px; }
+    .ctrl-btn { font-size: 10px; padding: 5px 10px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="connection" id="conn">connecting...</div>
 
-<div class="widget state-idle" id="widget">
-  <div class="slime" id="slime">
+<!-- SORA (left) -->
+<div class="widget state-idle" id="sora-widget">
+  <div class="bot-name">SORA</div>
+  <div class="slime">
     <div class="slime-body">
       <div class="face">
         <div class="eyes">
@@ -439,15 +464,41 @@
     <span class="zzz">z</span>
     <span class="zzz">Z</span>
   </div>
-  <div class="status-label" id="label">connecting...</div>
+  <div class="status-label" id="sora-label">connecting...</div>
   <div class="controls">
-    <button class="ctrl-btn" id="btn-restart" onclick="sendCommand('restart', this)">재시작</button>
-    <button class="ctrl-btn" id="btn-repair" onclick="sendCommand('repair', this)">자가수리</button>
+    <button class="ctrl-btn" onclick="sendCommand('restart', this, 'sora')">재시작</button>
+    <button class="ctrl-btn" onclick="sendCommand('repair', this, 'sora')">자가수리</button>
+  </div>
+</div>
+
+<!-- LUNA (right) -->
+<div class="widget state-idle" id="luna-widget">
+  <div class="bot-name">LUNA</div>
+  <div class="slime">
+    <div class="slime-body">
+      <div class="face">
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+        <div class="mouth"></div>
+      </div>
+    </div>
+    <span class="zzz">z</span>
+    <span class="zzz">z</span>
+    <span class="zzz">Z</span>
+  </div>
+  <div class="status-label" id="luna-label">connecting...</div>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="sendCommand('restart', this, 'luna')">재시작</button>
+    <button class="ctrl-btn" onclick="sendCommand('repair', this, 'luna')">자가수리</button>
   </div>
 </div>
 
 <script>
-  const FIREBASE_URL = 'https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app/status.json';
+  const FIREBASE_BASE = 'https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app';
+  const SORA_STATUS_URL = FIREBASE_BASE + '/status.json';
+  const LUNA_STATUS_URL = FIREBASE_BASE + '/luna/status.json';
 
   const STATES = {
     idle:     { cls: 'state-idle',     label: '대기중' },
@@ -466,48 +517,94 @@
     restarting: '재시작 중...',
   };
 
-  function setState(name, message, substate) {
+  // English → Korean message mapping
+  const MSG_KO = {
+    'processing message': '메시지 처리 중...',
+    'generating response': '응답 생성 중...',
+    'reading file': '파일 읽는 중...',
+    'searching': '검색 중...',
+    'thinking': '생각 중...',
+    'typing': '입력 중...',
+    'coding': '코딩 중...',
+    'reading': '읽는 중...',
+    'restarting': '재시작 중...',
+    'idle': '대기중',
+    'error': '에러 발생!',
+    'sleeping': 'zzZ...',
+    'heartbeat check': '상태 점검 중...',
+    'growth check': '성장 점검 중...',
+    'curator run': '큐레이터 실행 중...',
+    'thinking time': '사색 시간...',
+  };
+
+  function translateMessage(msg) {
+    if (!msg) return null;
+    const lower = msg.toLowerCase().trim();
+    if (MSG_KO[lower]) return MSG_KO[lower];
+    // Check partial matches
+    for (const [en, ko] of Object.entries(MSG_KO)) {
+      if (lower.includes(en)) return ko;
+    }
+    return msg; // Return original if no mapping found
+  }
+
+  function setWidgetState(widgetId, labelId, name, message, substate) {
     if (!STATES[name]) name = 'idle';
 
-    const widget = document.getElementById('widget');
-    const label  = document.getElementById('label');
+    const widget = document.getElementById(widgetId);
+    const label  = document.getElementById(labelId);
 
     Object.values(STATES).forEach(s => widget.classList.remove(s.cls));
     SUBSTATES.forEach(s => widget.classList.remove('sub-' + s));
 
     widget.classList.add(STATES[name].cls);
 
+    const translatedMsg = translateMessage(message);
+
     if (name === 'working' && substate && SUBSTATES.includes(substate)) {
       widget.classList.add('sub-' + substate);
-      label.textContent = message || SUBSTATE_LABELS[substate] || STATES[name].label;
+      label.textContent = translatedMsg || SUBSTATE_LABELS[substate] || STATES[name].label;
     } else {
-      label.textContent = message || STATES[name].label;
+      label.textContent = translatedMsg || STATES[name].label;
     }
   }
 
-  // Poll Firebase every 3 seconds
-  async function pollFirebase() {
+  // Poll Firebase for both bots
+  async function pollBoth() {
     const conn = document.getElementById('conn');
+    let anyLive = false;
+
     try {
-      const res = await fetch(FIREBASE_URL);
-      const status = await res.json();
-      conn.textContent = 'live';
-      conn.classList.add('live');
-      setState(status.state, status.message, status.substate);
+      const [soraRes, lunaRes] = await Promise.all([
+        fetch(SORA_STATUS_URL).then(r => r.json()).catch(() => null),
+        fetch(LUNA_STATUS_URL).then(r => r.json()).catch(() => null),
+      ]);
+
+      if (soraRes) {
+        setWidgetState('sora-widget', 'sora-label', soraRes.state, soraRes.message, soraRes.substate);
+        anyLive = true;
+      }
+      if (lunaRes) {
+        setWidgetState('luna-widget', 'luna-label', lunaRes.state, lunaRes.message, lunaRes.substate);
+        anyLive = true;
+      }
+
+      conn.textContent = anyLive ? 'live' : 'offline';
+      conn.classList.toggle('live', anyLive);
     } catch (e) {
       conn.textContent = 'offline';
       conn.classList.remove('live');
     }
   }
 
-  const FIREBASE_CMD_URL = 'https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app/commands.json';
-
-  async function sendCommand(action, btn) {
+  async function sendCommand(action, btn, bot) {
+    const cmdPath = bot === 'luna' ? '/luna/commands.json' : '/commands.json';
+    const cmdUrl = FIREBASE_BASE + cmdPath;
     const orig = btn.textContent;
     btn.textContent = '전송 중...';
     btn.classList.remove('error');
     try {
-      await fetch(FIREBASE_CMD_URL, {
+      await fetch(cmdUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -525,8 +622,8 @@
     }
   }
 
-  pollFirebase();
-  setInterval(pollFirebase, 3000);
+  pollBoth();
+  setInterval(pollBoth, 3000);
 </script>
 
 </body>
