@@ -510,7 +510,7 @@
 
 <script>
   const FIREBASE_BASE = 'https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app';
-  const SORA_STATUS_URL = FIREBASE_BASE + '/status.json';
+  const SORA_STATUS_URL = FIREBASE_BASE + '/sora/status.json';
   const LUNA_STATUS_URL = FIREBASE_BASE + '/luna/status.json';
 
   const STATES = {
@@ -636,7 +636,7 @@
   }
 
   async function sendCommand(action, btn, bot) {
-    const cmdPath = bot === 'luna' ? '/luna/commands.json' : '/commands.json';
+    const cmdPath = bot === 'luna' ? '/luna/commands.json' : '/sora/commands.json';
     const cmdUrl = FIREBASE_BASE + cmdPath;
     const orig = btn.textContent;
     btn.textContent = '전송 중...';
