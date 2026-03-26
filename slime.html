@@ -416,6 +416,17 @@
     border-color: rgba(255,255,255,0.25);
   }
   .ctrl-btn:active { transform: scale(0.95); }
+
+  /* ── Last update time ── */
+  .last-update {
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+    transition: color 0.4s ease;
+  }
+  .last-update.stale { color: #e05555; }
+  .last-update.recent { color: #4caf7d; }
   .ctrl-btn.sent {
     background: rgba(76,175,125,0.2);
     border-color: rgba(76,175,125,0.4);
@@ -465,6 +476,7 @@
     <span class="zzz">Z</span>
   </div>
   <div class="status-label" id="sora-label">connecting...</div>
+  <div class="last-update" id="sora-update">—</div>
   <div class="controls">
     <button class="ctrl-btn" onclick="sendCommand('restart', this, 'sora')">재시작</button>
     <button class="ctrl-btn" onclick="sendCommand('repair', this, 'sora')">자가수리</button>
@@ -489,6 +501,7 @@
     <span class="zzz">Z</span>
   </div>
   <div class="status-label" id="luna-label">connecting...</div>
+  <div class="last-update" id="luna-update">—</div>
   <div class="controls">
     <button class="ctrl-btn" onclick="sendCommand('restart', this, 'luna')">재시작</button>
     <button class="ctrl-btn" onclick="sendCommand('repair', this, 'luna')">자가수리</button>
@@ -548,6 +561,29 @@
     return msg; // Return original if no mapping found
   }
 
+  function formatTimeAgo(isoString) {
+    if (!isoString) return '—';
+    const updated = new Date(isoString);
+    const now = new Date();
+    const diffSec = Math.floor((now - updated) / 1000);
+    if (diffSec < 0) return '방금';
+    if (diffSec < 60) return `${diffSec}초 전`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}분 전`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}시간 전`;
+    return `${Math.floor(diffHr / 24)}일 전`;
+  }
+
+  function updateTimeDisplay(elementId, isoString) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.textContent = formatTimeAgo(isoString);
+    if (!isoString) { el.className = 'last-update'; return; }
+    const diffSec = Math.floor((new Date() - new Date(isoString)) / 1000);
+    el.className = 'last-update ' + (diffSec > 300 ? 'stale' : 'recent');
+  }
+
   function setWidgetState(widgetId, labelId, name, message, substate) {
     if (!STATES[name]) name = 'idle';
 
@@ -582,10 +618,12 @@
 
       if (soraRes) {
         setWidgetState('sora-widget', 'sora-label', soraRes.state, soraRes.message, soraRes.substate);
+        updateTimeDisplay('sora-update', soraRes.updated_at);
         anyLive = true;
       }
       if (lunaRes) {
         setWidgetState('luna-widget', 'luna-label', lunaRes.state, lunaRes.message, lunaRes.substate);
+        updateTimeDisplay('luna-update', lunaRes.updated_at);
         anyLive = true;
       }
 
