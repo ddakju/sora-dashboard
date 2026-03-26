@@ -228,6 +228,30 @@
   .sub-restarting .slime { animation: spin 1.5s linear infinite !important; }
   .sub-restarting .slime-body { animation: none !important; }
 
+  /* ── Mood: happy (score >= 70) ── */
+  .mood-happy .slime-body { background: #4caf7d; }
+  .mood-happy .slime-body::after { background: #4caf7d; }
+  .mood-happy .eye { background: #1a3a2e !important; width: 12px !important; height: 12px !important; border-radius: 50% !important; }
+  .mood-happy .mouth {
+    width: 22px !important; height: 10px !important;
+    border-radius: 0 0 12px 12px !important;
+    border-bottom: 3px solid #1a3a2e !important;
+    border-left: 3px solid #1a3a2e !important;
+    border-right: 3px solid #1a3a2e !important;
+    border-top: none !important;
+  }
+  .mood-happy .slime { animation: bounce 1.4s ease-in-out infinite !important; }
+
+  /* ── Mood: quiet (score < 50) ── */
+  .mood-quiet .eye { width: 8px !important; height: 8px !important; border-radius: 50% !important; }
+  .mood-quiet .mouth {
+    width: 12px !important; height: 2px !important;
+    border-radius: 2px !important;
+    border: none !important;
+    background: #1a3a2e !important;
+  }
+  .mood-quiet .slime { animation: bounce 3s ease-in-out infinite !important; }
+
   /* ── State: error ── */
   .state-error .slime-body { background: #e05555; }
   .state-error .slime-body::after { background: #e05555; }
@@ -584,7 +608,7 @@
     el.className = 'last-update ' + (diffSec > 300 ? 'stale' : 'recent');
   }
 
-  function setWidgetState(widgetId, labelId, name, message, substate) {
+  function setWidgetState(widgetId, labelId, name, message, substate, mood) {
     if (!STATES[name]) name = 'idle';
 
     const widget = document.getElementById(widgetId);
@@ -592,6 +616,7 @@
 
     Object.values(STATES).forEach(s => widget.classList.remove(s.cls));
     SUBSTATES.forEach(s => widget.classList.remove('sub-' + s));
+    widget.classList.remove('mood-happy', 'mood-quiet');
 
     widget.classList.add(STATES[name].cls);
 
@@ -600,6 +625,10 @@
     if (name === 'working' && substate && SUBSTATES.includes(substate)) {
       widget.classList.add('sub-' + substate);
       label.textContent = translatedMsg || SUBSTATE_LABELS[substate] || STATES[name].label;
+    } else if (name === 'idle' && mood) {
+      if (mood.score >= 70) widget.classList.add('mood-happy');
+      else if (mood.score < 50) widget.classList.add('mood-quiet');
+      label.textContent = mood.reason || STATES[name].label;
     } else {
       label.textContent = translatedMsg || STATES[name].label;
     }
@@ -617,12 +646,12 @@
       ]);
 
       if (soraRes) {
-        setWidgetState('sora-widget', 'sora-label', soraRes.state, soraRes.message, soraRes.substate);
+        setWidgetState('sora-widget', 'sora-label', soraRes.state, soraRes.message, soraRes.substate, soraRes.mood);
         updateTimeDisplay('sora-update', soraRes.updated_at);
         anyLive = true;
       }
       if (lunaRes) {
-        setWidgetState('luna-widget', 'luna-label', lunaRes.state, lunaRes.message, lunaRes.substate);
+        setWidgetState('luna-widget', 'luna-label', lunaRes.state, lunaRes.message, lunaRes.substate, lunaRes.mood);
         updateTimeDisplay('luna-update', lunaRes.updated_at);
         anyLive = true;
       }
