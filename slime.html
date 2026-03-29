@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SORA & LUNA Slime</title>
+<title>SORA & LUNA & NOVA Slime</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -122,6 +122,27 @@
     border-top: none;
   }
   .state-idle .slime { animation: bounce 2s ease-in-out infinite; }
+
+  /* ── NOVA idle override (cyan) ── */
+  #nova-widget.state-idle .slime-body { background: #00bcd4; }
+  #nova-widget.state-idle .slime-body::after { background: #00bcd4; }
+  #nova-widget.state-idle .eye { background: #0a3a40; }
+  #nova-widget.state-idle .mouth {
+    border-bottom-color: #0a3a40;
+    border-left-color: #0a3a40;
+    border-right-color: #0a3a40;
+  }
+  #nova-widget .status-label { color: #00bcd4; }
+
+  /* ── LUNA idle override (pink) ── */
+  #luna-widget.state-idle .slime-body { background: #d98ec4; }
+  #luna-widget.state-idle .slime-body::after { background: #d98ec4; }
+  #luna-widget.state-idle .eye { background: #3a1a30; }
+  #luna-widget.state-idle .mouth {
+    border-bottom-color: #3a1a30;
+    border-left-color: #3a1a30;
+    border-right-color: #3a1a30;
+  }
 
   /* ── State: working (default = typing) ── */
   .state-working .slime-body { background: #4a90d9; }
@@ -507,7 +528,7 @@
   </div>
 </div>
 
-<!-- LUNA (right) -->
+<!-- LUNA (center) -->
 <div class="widget state-idle" id="luna-widget">
   <div class="bot-name">LUNA</div>
   <div class="slime">
@@ -532,10 +553,36 @@
   </div>
 </div>
 
+<!-- NOVA (right) -->
+<div class="widget state-idle" id="nova-widget">
+  <div class="bot-name">NOVA</div>
+  <div class="slime">
+    <div class="slime-body">
+      <div class="face">
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+        <div class="mouth"></div>
+      </div>
+    </div>
+    <span class="zzz">z</span>
+    <span class="zzz">z</span>
+    <span class="zzz">Z</span>
+  </div>
+  <div class="status-label" id="nova-label">connecting...</div>
+  <div class="last-update" id="nova-update">—</div>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="sendCommand('restart', this, 'nova')">재시작</button>
+    <button class="ctrl-btn" onclick="sendCommand('repair', this, 'nova')">자가수리</button>
+  </div>
+</div>
+
 <script>
   const FIREBASE_BASE = 'https://sora-7d10c-default-rtdb.asia-southeast1.firebasedatabase.app';
   const SORA_STATUS_URL = FIREBASE_BASE + '/sora/status.json';
   const LUNA_STATUS_URL = FIREBASE_BASE + '/luna/status.json';
+  const NOVA_STATUS_URL = FIREBASE_BASE + '/nova/status.json';
 
   const STATES = {
     idle:     { cls: 'state-idle',     label: '대기중' },
@@ -640,9 +687,10 @@
     let anyLive = false;
 
     try {
-      const [soraRes, lunaRes] = await Promise.all([
+      const [soraRes, lunaRes, novaRes] = await Promise.all([
         fetch(SORA_STATUS_URL).then(r => r.json()).catch(() => null),
         fetch(LUNA_STATUS_URL).then(r => r.json()).catch(() => null),
+        fetch(NOVA_STATUS_URL).then(r => r.json()).catch(() => null),
       ]);
 
       if (soraRes) {
@@ -655,6 +703,11 @@
         updateTimeDisplay('luna-update', lunaRes.updated_at);
         anyLive = true;
       }
+      if (novaRes) {
+        setWidgetState('nova-widget', 'nova-label', novaRes.state, novaRes.message, novaRes.substate, novaRes.mood);
+        updateTimeDisplay('nova-update', novaRes.updated_at);
+        anyLive = true;
+      }
 
       conn.textContent = anyLive ? 'live' : 'offline';
       conn.classList.toggle('live', anyLive);
@@ -665,7 +718,7 @@
   }
 
   async function sendCommand(action, btn, bot) {
-    const cmdPath = bot === 'luna' ? '/luna/commands.json' : '/sora/commands.json';
+    const cmdPath = '/' + bot + '/commands.json';
     const cmdUrl = FIREBASE_BASE + cmdPath;
     const orig = btn.textContent;
     btn.textContent = '전송 중...';
